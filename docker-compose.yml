@@ -1,0 +1,35 @@
+services:
+  webfetcher:
+    build:
+      context: .
+      dockerfile: Dockerfile.webfetcher
+    container_name: webfetcher
+    env_file:
+      - .env
+    environment:
+      - CHROME_CDP_URL=http://lightpanda:9222
+      - SSL_CERT_FILE=/app/certs/custom.crt
+      - WEBFETCHER_LOG_LEVEL=${WEBFETCHER_LOG_LEVEL}
+    depends_on:
+      - lightpanda
+    ports:
+      - "8000:8000"
+    networks:
+      - webfetcher_network
+
+  lightpanda:
+    build:
+      context: .
+      dockerfile: Dockerfile.lightpanda
+    container_name: lightpanda
+    env_file:
+      - .env
+    environment:
+      - LIGHTPANDA_ADVERTISE_HOST=lightpanda
+      - LIGHTPANDA_LOG_LEVEL=${LIGHTPANDA_LOG_LEVEL}
+    networks:
+      - webfetcher_network
+
+networks:
+  webfetcher_network:
+    driver: bridge

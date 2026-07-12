@@ -1,0 +1,118 @@
+# webfetcher
+
+## System Architecture
+- Chromium-compatible CDP endpoint (for example, Lightpanda)
+- trafilatura: https://github.com/adbar/trafilatura
+- fastapi
+
+This project provides a FastAPI-based web fetching service. It retrieves web pages using `httpx` or a Chromium-compatible CDP renderer and extracts text content using `trafilatura`.
+Web pages rendered with JavaScript are fetched through the Chromium DevTools Protocol.
+
+## Features
+- `webfetcher` retrieves web pages from provided URLs and extracts text data.
+- Extracted text can be returned or saved in requested formats such as JSON or Markdown.
+
+## API
+
+### POST /fetch
+Request body:
+- `URL`: an array of web page URLs to fetch
+- `output_format`: output format for extracted text data (`json`, `markdown`, etc.)
+- `with_metadata`: include metadata or not (`true`, `false`)
+- `method`: fetch method (`httpx`, `cdp`, etc.)
+- `include_comments`: include comments or not (`true`, `false`) default: `true`
+- `include_tables`: include tables or not (`true`, `false`) default: `true`
+- `include_formatting`: keep formatting-related structural elements (`<b>/<strong>`, `<i>/<emph>`, etc.)
+- `include_links`: keep links (`<a href="...">...</a>`)
+- `include_images`: keep images (`<img src="...">`)
+- `favor_precision`: increase precision-oriented extraction (`true`, `false`) default: `false`
+- `favor_recall`: increase recall-oriented extraction (`true`, `false`) default: `false`
+
+Example `curl` request:
+
+```bash
+curl -X POST http://localhost:8000/fetch \
+  -H "Content-Type: application/json" \
+   -d '{"URL": ["https://example.com"], "output_format": "markdown", "method": "cdp", "with_metadata": true, "favor_precision": false, "favor_recall": false}'
+```
+
+## Usage
+1. Install dependencies listed in `pyproject.toml`.
+   ```bash
+   python -m pip install --upgrade pip
+   python -m pip install .
+   ```
+2. Run the FastAPI app with `uv`.
+   ```bash
+   uv run app:app --host 0.0.0.0 --port 8000
+   ```
+3. Send a POST request to `/fetch` with the desired parameters.
+
+## Docker Compose
+This repository includes a `Dockerfile` and `docker-compose.yml` to run the service in separate containers.
+
+`webfetcher` is the FastAPI service for fetching and extracting text. The renderer service is any Chromium-compatible CDP endpoint; the sample Docker Compose setup uses the official Lightpanda image as an example. `webfetcher` calls this endpoint when `method` is set to `cdp`.
+
+To build and start both services:
+
+```bash
+docker compose up --build
+```
+
+Environment variables are centralized in `.env` and loaded by Compose.
+Start from `.env.example` and copy it to `.env` before running Compose.
+
+Current `.env` keys:
+- `CHROME_CDP_URL`: CDP endpoint URL (default: `http://lightpanda:9222`)
+- `SSL_CERT_FILE`: custom CA certificate path (`/app/certs/custom.crt`)
+- `WEBFETCHER_LOG_LEVEL`: log level for `webfetcher` (for example `info`, `debug`)
+- `LIGHTPANDA_ADVERTISE_HOST`: advertised CDP host name for lightpanda (default: `lightpanda`)
+- `LIGHTPANDA_LOG_LEVEL`: log level for `lightpanda`
+
+The `webfetcher` API is available on port `8000`.
+
+To stop the services:
+
+```bash
+docker compose down
+```
+
+## Official Chromium-compatible Container Example
+This service can use any Chromium-compatible CDP endpoint.
+
+For a sample renderer, run the official Lightpanda image:
+
+```bash
+docker run -d --name lightpanda -p 127.0.0.1:9222:9222 lightpanda/browser:nightly
+```
+
+Then configure `webfetcher` with:
+
+```bash
+export CHROME_CDP_URL=http://127.0.0.1:9222
+```
+
+In `docker-compose.yml`, the sample renderer service is named `lightpanda` and exposes CDP on port `9222` inside the compose network.
+
+## Local Development
+Run only the webfetcher service locally:
+
+```bash
+uv run app:app --host 0.0.0.0 --port 8000
+```
+
+## Notes
+- This repository currently uses `app.py` as the FastAPI entry point.
+- The renderer can be any Chromium-compatible CDP endpoint and is only used when `method` is set to `cdp`.
+- The container build installs dependencies from `pyproject.toml`.
+
+## Publishing Checklist
+- Add a repository description and topics on GitHub.
+- Set the repository visibility and default branch policy.
+- Confirm `.env` is not committed (`.gitignore` is already configured).
+- Verify `LICENSE`, `CONTRIBUTING.md`, and `SECURITY.md` are present.
+
+## Project Policies
+- License: see `LICENSE`
+- Contribution guide: see `CONTRIBUTING.md`
+- Security policy: see `SECURITY.md`

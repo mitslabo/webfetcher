@@ -1,0 +1,13 @@
+FROM lightpanda/browser:nightly
+
+COPY ./certs/* /usr/local/share/ca-certificates
+
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+RUN update-ca-certificates
+
+USER lightpanda
+
+CMD /bin/lightpanda serve --host 0.0.0.0 --port 9222 --advertise-host ${LIGHTPANDA_ADVERTISE_HOST} --log-level ${LIGHTPANDA_LOG_LEVEL:-info} --insecure-disable-tls-host-verification

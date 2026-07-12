@@ -1,0 +1,24 @@
+FROM ghcr.io/astral-sh/uv:trixie-slim AS builder
+
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+COPY certs/custom.crt ./certs/custom.crt
+
+# Install dependencies into the build environment
+ENV SSL_CERT_DIR=/app/certs
+RUN uv sync --locked
+
+# Copy application source files after dependency installation
+COPY . /app
+
+FROM builder AS runtime
+
+WORKDIR /app
+
+# Disable development dependencies
+ENV UV_NO_DEV=1
+
+EXPOSE 8000
+
+CMD uv run uvicorn app:app --host 0.0.0.0 --port 8000 --log-level ${WEBFETCHER_LOG_LEVEL:-info}
+
