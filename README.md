@@ -1,5 +1,9 @@
 # webfetcher
 
+## Features
+- `webfetcher` retrieves web pages from provided URLs and extracts text data.
+- Extracted text can be returned or saved in requested formats such as JSON or Markdown.
+
 ## System Architecture
 - Chromium-compatible CDP endpoint (for example, Lightpanda)
 - trafilatura: https://github.com/adbar/trafilatura
@@ -7,10 +11,6 @@
 
 This project provides a FastAPI-based web fetching service. It retrieves web pages using `httpx` or a Chromium-compatible CDP renderer and extracts text content using `trafilatura`.
 Web pages rendered with JavaScript are fetched through the Chromium DevTools Protocol.
-
-## Features
-- `webfetcher` retrieves web pages from provided URLs and extracts text data.
-- Extracted text can be returned or saved in requested formats such as JSON or Markdown.
 
 ## API
 
@@ -39,12 +39,11 @@ curl -X POST http://localhost:8000/fetch \
 ## Usage
 1. Install dependencies listed in `pyproject.toml`.
    ```bash
-   python -m pip install --upgrade pip
-   python -m pip install .
+   uv sync
    ```
-2. Run the FastAPI app with `uv`.
+2. Run the FastAPI app with `uvicorn`.
    ```bash
-   uv run app:app --host 0.0.0.0 --port 8000
+   uv run uvicorn app:app --host 0.0.0.0 --port 8000
    ```
 3. Send a POST request to `/fetch` with the desired parameters.
 
