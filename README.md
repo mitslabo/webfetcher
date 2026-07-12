@@ -112,6 +112,6 @@ uv run app:app --host 0.0.0.0 --port 8000
 - Verify `LICENSE`, `CONTRIBUTING.md`, and `SECURITY.md` are present.
 
 ## Project Policies
-- License: see `LICENSE`
+- License: AGPL-3.0 (see `LICENSE`)
 - Contribution guide: see `CONTRIBUTING.md`
 - Security policy: see `SECURITY.md`

@@ -3,7 +3,7 @@ name = "webfetcher"
 version = "0.1.0"
 description = "A FastAPI-based web page fetcher that extracts text using trafilatura and optionally renders JavaScript through a Chromium-compatible CDP endpoint."
 readme = "README.md"
-license = "MIT"
+license = "AGPL-3.0-only"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi",
