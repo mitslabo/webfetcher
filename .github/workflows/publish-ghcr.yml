@@ -62,7 +62,6 @@ jobs:
             type=raw,value=latest
             type=sha
 
-
       - name: Build and push webfetcher image
         uses: docker/build-push-action@v6
         with:
@@ -91,10 +90,7 @@ jobs:
           file: Dockerfile.lightpanda
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: | 
-            type=raw,value=${{ steps.target.outputs.tag }}
-            type=raw,value=latest
-            type=sha
+          tags: ${{ steps.meta_lightpanda.outputs.tags }}
           labels: ${{ steps.meta_lightpanda.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
