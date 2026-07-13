@@ -90,7 +90,12 @@ async def fetch(req: FetchRequest) -> Dict[str, Any]:
             if extracted_contents is None:
                 raise HTTPException(status_code=500, detail=f"Failed to extract content from {url}")
 
-            response_body: Dict[str, Any] = {"url": url} | json.loads(extracted_contents)
+            if req.output_format == "json":
+                output_contents = json.loads(extracted_contents)
+            else:
+                output_contents = {"content": extracted_contents}
+
+            response_body: Dict[str, Any] = {"url": url} | output_contents
 
             results.append(response_body)
         except Exception as exc:
