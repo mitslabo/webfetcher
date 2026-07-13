@@ -12,4 +12,5 @@ dependencies = [
     "httpx",
     "playwright",
     "trafilatura",
+    "truststore>=0.10.4",
 ]

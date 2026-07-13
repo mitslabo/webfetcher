@@ -1,17 +1,20 @@
 from __future__ import annotations
 
 import os
+import ssl
 from enum import Enum
 from logging import getLogger
 from typing import Any, Dict, List
 
 import httpx
 import trafilatura
+import truststore
 from fastapi import FastAPI, HTTPException
 from playwright.async_api import async_playwright
 from pydantic import BaseModel, Field
 
 CHROME_CDP_URL = os.getenv("CHROME_CDP_URL", "http://127.0.0.1:9222")
+HTTPX_TLS_VERIFY = os.getenv("HTTPX_TLS_VERIFY", "true").lower() == "true"
 
 
 class FetchMethod(str, Enum):
@@ -38,7 +41,8 @@ app = FastAPI(title="webfetcher", version="0.1.0")
 
 
 async def fetch_html_httpx(url: str) -> str:
-    async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
+    ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    async with httpx.AsyncClient(follow_redirects=True, timeout=30.0, verify=ctx) as client:
         response = await client.get(url)
         response.raise_for_status()
         return response.text

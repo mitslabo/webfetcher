@@ -1,20 +1,20 @@
 FROM ghcr.io/astral-sh/uv:trixie-slim
 
 WORKDIR /app
+COPY certs/*.crt /usr/local/share/ca-certificates/
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 RUN update-ca-certificates
 
-COPY pyproject.toml uv.lock ./
-COPY certs/custom.crt ./certs/custom.crt
-
-# Install dependencies into the build environment
-ENV SSL_CERT_DIR=/app/certs
-RUN uv sync --locked
+COPY . /app
 
 # Disable development dependencies
 ENV UV_NO_DEV=1
+ENV UV_SYSTEM_CERTS=1
+
+# Install dependencies into the build environment
+RUN uv sync --locked
 
 EXPOSE 8000
 
