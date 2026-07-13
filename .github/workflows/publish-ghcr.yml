@@ -29,7 +29,9 @@ jobs:
           - name: lightpanda
             file: Dockerfile.lightpanda
             image: ghcr.io/${{ github.repository }}-lightpanda
-            extra_tags: ""
+            extra_tags: |
+              type=raw,value=latest
+
     steps:
       - name: Checkout source at tag
         uses: actions/checkout@v4
