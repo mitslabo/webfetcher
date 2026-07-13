@@ -1,5 +1,4 @@
 name: Publish Container to GHCR
-
 on:
   release:
     types: [published]
@@ -17,30 +16,25 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-
+    env:
+      TAG: ${{ github.event.inputs.tag || github.event.release.tag_name }}
+    strategy:
+      matrix:
+        include:
+          - name: webfetcher
+            file: Dockerfile.webfetcher
+            image: ghcr.io/${{ github.repository }}
+            extra_tags: |
+              type=raw,value=latest
+          - name: lightpanda
+            file: Dockerfile.lightpanda
+            image: ghcr.io/${{ github.repository }}-lightpanda
+            extra_tags: ""
     steps:
-      - name: Resolve target tag
-        id: target
-        run: |
-          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            TAG="$(jq -r '.inputs.tag // empty' "$GITHUB_EVENT_PATH")"
-          elif [ "${GITHUB_EVENT_NAME}" = "release" ]; then
-            TAG="$(jq -r '.release.tag_name // empty' "$GITHUB_EVENT_PATH")"
-          else
-            TAG=""
-          fi
-
-          if [ -z "$TAG" ]; then
-            echo "Unable to resolve tag from event: ${GITHUB_EVENT_NAME}" >&2
-            exit 1
-          fi
-
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-
       - name: Checkout source at tag
         uses: actions/checkout@v4
         with:
-          ref: refs/tags/${{ steps.target.outputs.tag }}
+          ref: refs/tags/${{ env.TAG }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -52,45 +46,24 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
 
-      - name: Prepare webfetcher metadata
-        id: meta_webfetcher
+      - name: Prepare metadata
+        id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ${{ matrix.image }}
           tags: |
-            type=raw,value=${{ steps.target.outputs.tag }}
-            type=raw,value=latest
+            type=raw,value=${{ env.TAG }}
             type=sha
+            ${{ matrix.extra_tags }}
 
-      - name: Build and push webfetcher image
+      - name: Build and push image
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: Dockerfile.webfetcher
+          file: ${{ matrix.file }}
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta_webfetcher.outputs.tags }}
-          labels: ${{ steps.meta_webfetcher.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Prepare lightpanda metadata
-        id: meta_lightpanda
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}-lightpanda
-          tags: |
-            type=raw,value=${{ steps.target.outputs.tag }}
-            type=sha
-
-      - name: Build and push lightpanda image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile.lightpanda
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta_lightpanda.outputs.tags }}
-          labels: ${{ steps.meta_lightpanda.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
