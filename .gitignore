@@ -12,3 +12,5 @@ wheels/
 *.crt
 
 .env
+
+docker-compose.override.yml

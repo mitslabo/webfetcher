@@ -9,6 +9,8 @@ services:
       - WEBFETCHER_LOG_LEVEL=${WEBFETCHER_LOG_LEVEL}
     depends_on:
       - lightpanda
+    volumes:
+      - ./certs:/usr/local/share/ca-certificates
     ports:
       - "8000:8000"
     networks:
@@ -22,6 +24,8 @@ services:
     environment:
       - LIGHTPANDA_ADVERTISE_HOST=lightpanda
       - LIGHTPANDA_LOG_LEVEL=${LIGHTPANDA_LOG_LEVEL}
+    volumes:
+      - ./certs:/usr/local/share/ca-certificates
     networks:
       - webfetcher_network
 

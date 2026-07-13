@@ -1,17 +1,10 @@
 FROM ghcr.io/astral-sh/uv:trixie-slim
 
 WORKDIR /app
-COPY certs/ /tmp/custom-certs/
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
-        && rm -rf /var/lib/apt/lists/* \
-        && if ls /tmp/custom-certs/*.crt >/dev/null 2>&1; then \
-            cp /tmp/custom-certs/*.crt /usr/local/share/ca-certificates/; \
-            update-ca-certificates; \
-        else \
-            echo "No custom .crt files found under certs/; skipping CA update."; \
-        fi \
-        && rm -rf /tmp/custom-certs
+    ca-certificates &&\
+    rm -rf /var/lib/apt/lists/* && \
+    update-ca-certificates
 
 COPY . /app
 
