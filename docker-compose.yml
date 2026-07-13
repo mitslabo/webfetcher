@@ -1,8 +1,6 @@
 services:
   webfetcher:
-    build:
-      context: .
-      dockerfile: Dockerfile.webfetcher
+    image: ghcr.io/mitslabo/webfetcher:${WEBFETCHER_TAG:-latest}
     container_name: webfetcher
     env_file:
       - .env
@@ -17,9 +15,7 @@ services:
       - webfetcher_network
 
   lightpanda:
-    build:
-      context: .
-      dockerfile: Dockerfile.lightpanda
+    image: ghcr.io/mitslabo/webfetcher-lightpanda:${LIGHTPANDA_TAG:-latest}
     container_name: lightpanda
     env_file:
       - .env

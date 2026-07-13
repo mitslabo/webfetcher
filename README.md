@@ -48,14 +48,16 @@ curl -X POST http://localhost:8000/fetch \
 3. Send a POST request to `/fetch` with the desired parameters.
 
 ## Docker Compose
-This repository includes a `Dockerfile` and `docker-compose.yml` to run the service in separate containers.
+This repository includes `docker-compose.yml` to run the service in separate containers.
 
 `webfetcher` is the FastAPI service for fetching and extracting text. The renderer service is any Chromium-compatible CDP endpoint; the sample Docker Compose setup uses the official Lightpanda image as an example. `webfetcher` calls this endpoint when `method` is set to `cdp`.
 
-To build and start both services:
+To start both services with published GHCR images:
 
 ```bash
-docker compose up --build
+set WEBFETCHER_TAG=0.2.0
+set LIGHTPANDA_TAG=0.2.0
+docker compose up -d
 ```
 
 Environment variables are centralized in `.env` and loaded by Compose.
@@ -103,7 +105,41 @@ uv run app:app --host 0.0.0.0 --port 8000
 ## Notes
 - This repository currently uses `app.py` as the FastAPI entry point.
 - The renderer can be any Chromium-compatible CDP endpoint and is only used when `method` is set to `cdp`.
-- The container build installs dependencies from `pyproject.toml`.
+- The `webfetcher` container image is pulled from GHCR by default in `docker-compose.yml`.
+
+## Publish Container to GHCR
+This repository includes a GitHub Actions workflow at `.github/workflows/publish-ghcr.yml` that publishes the `webfetcher` image to GHCR.
+
+Publishing options:
+- Publish a GitHub Release: when a release is published, the workflow builds from that tag and pushes the image.
+- Manual dispatch: run the workflow manually and provide the target `tag` input.
+
+Published image:
+- `ghcr.io/<owner>/<repo>:<tag>`
+- `ghcr.io/<owner>/<repo>:sha-<short-commit>`
+- `ghcr.io/<owner>/<repo>-lightpanda:<tag>`
+- `ghcr.io/<owner>/<repo>-lightpanda:sha-<short-commit>`
+
+Example pull command:
+
+```bash
+docker pull ghcr.io/mitslabo/webfetcher:0.2.0
+docker pull ghcr.io/mitslabo/webfetcher-lightpanda:0.2.0
+```
+
+Run with Compose using a published GHCR image:
+
+```bash
+set WEBFETCHER_TAG=0.2.0
+set LIGHTPANDA_TAG=0.2.0
+docker compose up -d
+```
+
+To stop:
+
+```bash
+docker compose down
+```
 
 ## Publishing Checklist
 - Add a repository description and topics on GitHub.
