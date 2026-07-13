@@ -1,6 +1,6 @@
 [project]
 name = "webfetcher"
-version = "0.2.5"
+version = "0.2.6"
 description = "A FastAPI-based web page fetcher that extracts text using trafilatura and optionally renders JavaScript through a Chromium-compatible CDP endpoint."
 readme = "README.md"
 license = "AGPL-3.0-only"

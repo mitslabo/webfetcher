@@ -91,7 +91,7 @@ jobs:
           file: Dockerfile.lightpanda
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: |
+          tags: | 
             type=raw,value=${{ steps.target.outputs.tag }}
             type=raw,value=latest
             type=sha
