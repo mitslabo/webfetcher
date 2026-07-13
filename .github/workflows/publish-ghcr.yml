@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Git tag to publish (example: 0.2.0)
+        description: Git tag to publish (example: v0.2.0 or 0.2.0)
         required: true
         type: string
 
@@ -23,24 +23,27 @@ jobs:
         id: target
         run: |
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            TAG="$(jq -r '.inputs.tag // empty' "$GITHUB_EVENT_PATH")"
+            RAW_TAG="$(jq -r '.inputs.tag // empty' "$GITHUB_EVENT_PATH")"
           elif [ "${GITHUB_EVENT_NAME}" = "release" ]; then
-            TAG="$(jq -r '.release.tag_name // empty' "$GITHUB_EVENT_PATH")"
+            RAW_TAG="$(jq -r '.release.tag_name // empty' "$GITHUB_EVENT_PATH")"
           else
-            TAG=""
+            RAW_TAG=""
           fi
 
-          if [ -z "$TAG" ]; then
+          if [ -z "$RAW_TAG" ]; then
             echo "Unable to resolve tag from event: ${GITHUB_EVENT_NAME}" >&2
             exit 1
           fi
 
+          TAG="${RAW_TAG#v}"
+
+          echo "raw_tag=$RAW_TAG" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Checkout source at tag
         uses: actions/checkout@v4
         with:
-          ref: refs/tags/${{ steps.target.outputs.tag }}
+          ref: refs/tags/${{ steps.target.outputs.raw_tag }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -77,7 +80,7 @@ jobs:
         id: meta_lightpanda
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}-lightpanda
+          images: ghcr.io/${{ github.repository }}/lightpanda
           tags: |
             type=raw,value=${{ steps.target.outputs.tag }}
             type=sha
