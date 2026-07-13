@@ -20,13 +20,13 @@ Request body:
 - `output_format`: output format for extracted text data (`json`, `markdown`, etc.)
 - `with_metadata`: include metadata or not (`true`, `false`)
 - `method`: fetch method (`httpx`, `cdp`, etc.)
-- `include_comments`: include comments or not (`true`, `false`) default: `true`
-- `include_tables`: include tables or not (`true`, `false`) default: `true`
-- `include_formatting`: keep formatting-related structural elements (`<b>/<strong>`, `<i>/<emph>`, etc.)
-- `include_links`: keep links (`<a href="...">...</a>`)
-- `include_images`: keep images (`<img src="...">`)
-- `favor_precision`: increase precision-oriented extraction (`true`, `false`) default: `false`
-- `favor_recall`: increase recall-oriented extraction (`true`, `false`) default: `false`
+- `include_comments`: include comments or not (`true`, `false`)
+- `include_tables`: include tables or not (`true`, `false`)
+- `include_formatting`: keep formatting-related structural elements (`<b>/<strong>`, `<i>/<emph>`, etc.) (`false`, `true`)
+- `include_links`: keep links (`<a href="...">...</a>`) (`false`, `true`)
+- `include_images`: keep images (`<img src="...">`) (`false`, `true`)
+- `favor_precision`: increase precision-oriented extraction (`false`, `true`)
+- `favor_recall`: increase recall-oriented extraction (`false`,`true`)
 
 Example `curl` request:
 
