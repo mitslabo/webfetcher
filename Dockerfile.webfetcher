@@ -4,8 +4,7 @@ WORKDIR /app
 COPY certs/*.crt /usr/local/share/ca-certificates/
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-RUN update-ca-certificates
+    && rm -rf /var/lib/apt/lists/* && update-ca-certificates
 
 COPY . /app
 

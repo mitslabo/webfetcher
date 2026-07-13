@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import ssl
 from enum import Enum
@@ -86,11 +87,10 @@ async def fetch(req: FetchRequest) -> Dict[str, Any]:
                 favor_recall=req.favor_recall,
                 with_metadata=req.with_metadata,
             )
+            if extracted_contents is None:
+                raise HTTPException(status_code=500, detail=f"Failed to extract content from {url}")
 
-            response_body: Dict[str, Any] = {
-                "url": url,
-                "text": extracted_contents or "",
-            }
+            response_body: Dict[str, Any] = {"url": url} | json.loads(extracted_contents)
 
             results.append(response_body)
         except Exception as exc:
