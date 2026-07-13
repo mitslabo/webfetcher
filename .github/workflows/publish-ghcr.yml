@@ -21,15 +21,21 @@ jobs:
     steps:
       - name: Resolve target tag
         id: target
-        env:
-          DISPATCH_TAG: ${{ inputs.tag }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          if [ -n "$DISPATCH_TAG" ]; then
-            echo "tag=$DISPATCH_TAG" >> "$GITHUB_OUTPUT"
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            TAG="$(jq -r '.inputs.tag // empty' "$GITHUB_EVENT_PATH")"
+          elif [ "${GITHUB_EVENT_NAME}" = "release" ]; then
+            TAG="$(jq -r '.release.tag_name // empty' "$GITHUB_EVENT_PATH")"
           else
-            echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+            TAG=""
           fi
+
+          if [ -z "$TAG" ]; then
+            echo "Unable to resolve tag from event: ${GITHUB_EVENT_NAME}" >&2
+            exit 1
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Checkout source at tag
         uses: actions/checkout@v4
